@@ -23,15 +23,15 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(final HttpServletRequest request,
             final HttpServletResponse response, final FilterChain filterChain)
             throws ServletException, IOException {
-        final AuthenticationToken authenticationToken = authenticationToken(request);
+        final String token = request.getHeader(HTTP_HEADER_AUTHENTICATION);
+        if (token == null) {
+            filterChain.doFilter(request, response);
+        }
+
+        final AuthenticationToken authenticationToken = new AuthenticationToken(token);
         registerAuthenticationToSecurityContextHolder(authenticationToken);
 
         filterChain.doFilter(request, response);
-    }
-
-    private static AuthenticationToken authenticationToken(final HttpServletRequest request) {
-        final String token = request.getHeader(HTTP_HEADER_AUTHENTICATION);
-        return new AuthenticationToken(token);
     }
 
     private static void registerAuthenticationToSecurityContextHolder(

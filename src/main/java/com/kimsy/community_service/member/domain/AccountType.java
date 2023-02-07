@@ -18,10 +18,12 @@ public enum AccountType {
                     accountType -> accountType.tokenValue,
                     accountType -> accountType));
 
-    public static void validateSupportOrNot(final String tokenValue) {
+    public static AccountType from(final String tokenValue) {
         if (!StringUtils.hasText(tokenValue) || !TOKEN_VALUE_ACCOUNT_TYPE.containsKey(tokenValue)) {
             throw new IllegalArgumentException("지원되지 않는 역할입니다.");
         }
+
+        return TOKEN_VALUE_ACCOUNT_TYPE.get(tokenValue);
     }
 
     private final String tokenValue;

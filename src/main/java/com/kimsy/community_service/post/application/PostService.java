@@ -39,8 +39,8 @@ public class PostService {
     }
 
     private Member getMemberBy(final Authentication authentication) {
-        final Long accountId = (Long) authentication.getPrincipal();
-        return memberRepository.findByAccountId(accountId)
+        final CustomAuthentication auth = (CustomAuthentication) authentication;
+        final Member member = memberRepository.findByAccountId(auth.getAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
     }
 

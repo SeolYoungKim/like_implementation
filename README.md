@@ -3,23 +3,16 @@
 - Gradle 7.6
 - Java 1.8
 - Spring Boot 2.7.8
-- Spring Data JPA
+- Spring Data JPA 2.7.7
 - Query DSL 5.0
-- Spring Security 
+- Spring Security 5.7.6
 
 ## 실행 방법
+1. [CommunityServiceApplication의 main() 메서드 실행](src/main/java/com/kimsy/community_service/CommunityServiceApplication.java)
+2. `http://localhost:8080`
 
 ## 검증 및 구현 방식 
 - 글 작성, 수정, 삭제 
 - 글 좋아요
 - 글 목록 
 - 인증 체계
-
-## 추가 구현 예정 기능 
-- 페이징 (커뮤니티다 보니 최신 글 순으로 노출 해줘야 한다고 생각)
-  - QueryDSL을 활용하여 페이징 적용 예정
-
-## 고민
-- 회원 가입 및 로그인 기능을 구현해야 할까?
-  - 자리톡의 서브 기능을 구현하는 것이기 때문에, 이미 회원가입 기능과 로그인 기능은 구현되어 있다고 가정해도 될 것 같다.
-  - 일단 회원 가입 + 로그인 기능이 구현되어, 토큰까지 클라이언트에 발급되어 있는 상황이라고 가정하고 기능을 구현 해보도록 하자. 

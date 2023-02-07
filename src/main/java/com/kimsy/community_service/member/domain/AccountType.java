@@ -11,7 +11,7 @@ public enum AccountType {
     REALTOR("Realtor", "공인 중개사"),
     LESSOR("Lessor", "임대인"),
     LESSEE("Lessee", "임차인"),
-    GUEST("Guest", "게스트");
+    ;
 
     private static final Map<String, AccountType> TOKEN_VALUE_ACCOUNT_TYPE = Arrays.stream(values())
             .collect(Collectors.toMap(

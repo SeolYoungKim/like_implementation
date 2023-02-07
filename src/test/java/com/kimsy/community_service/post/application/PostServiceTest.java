@@ -151,4 +151,68 @@ class PostServiceTest {
                     .hasMessageContaining("게시글 작성자가 아니면 수정/삭제 요청을 할 수 없습니다.");
         }
     }
+
+    @DisplayName("게시글을 삭제할 때")
+    @Nested
+    class Delete {
+        private final Long postId = 100L;
+        private Post post;
+
+        @BeforeEach
+        void setUp() {
+            post = new Post("title", "contents", member);
+        }
+
+        @DisplayName("올바른 값이 넘어왔을 경우 게시글이 삭제된다.")
+        @Test
+        void success() {
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+
+            final PostDeleteResponse postResponse = postService.deletePost(postId, mockAuth);
+            assertThat(postResponse.isDeleted()).isTrue();
+        }
+
+        @DisplayName("없는 게시글일 경우 예외를 발생시킨다.")
+        @Test
+        void failByNotExistPost() {
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+            when(postRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("없는 게시글입니다.");
+        }
+
+        @DisplayName("회원이 아닌 사람이 요청한 경우, 즉 Authentication이 null로 넘어올 경우 예외를 발생시킨다.")
+        @Test
+        void failByAuthentication() {
+            assertThatThrownBy(() -> postService.deletePost(postId, null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
+        }
+
+        @DisplayName("accountId로 조회되지 않는 회원이 요청한 경우 예외를 발생시킨다.")
+        @Test
+        void failByAccountId() {
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("없는 회원입니다.");
+        }
+
+        @DisplayName("게시글 작성자가 아닌 경우 예외를 발생시킨다.")
+        @Test
+        void failByNotAuthor() {
+            final Member notAuthor = new Member("notAuthor", AccountType.REALTOR, 34L, Quit.NO);
+
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(notAuthor));
+            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+
+            assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("게시글 작성자가 아니면 수정/삭제 요청을 할 수 없습니다.");
+        }
+    }
 }

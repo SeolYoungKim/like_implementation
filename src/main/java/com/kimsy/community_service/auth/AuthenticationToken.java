@@ -17,7 +17,7 @@ public class AuthenticationToken {
     }
 
     private String[] parseToken(final String token) {
-        final String[] parsedToken = token.split(" ");
+        final String[] parsedToken = token.trim().split(" ");
         validateTokenInfo(parsedToken);
 
         return parsedToken;

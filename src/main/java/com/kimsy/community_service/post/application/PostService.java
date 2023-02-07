@@ -34,7 +34,7 @@ public class PostService {
 
     private void validateAuthenticationIsNull(final Authentication authentication) {
         if (authentication == null) {
-            throw new IllegalArgumentException("글 작성은 회원만 할 수 있습니다.");
+            throw new IllegalArgumentException("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
         }
     }
 
@@ -44,7 +44,7 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
     }
 
-    private static Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
+    private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
         return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member);
     }
 

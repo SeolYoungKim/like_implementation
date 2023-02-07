@@ -7,6 +7,7 @@ import com.kimsy.community_service.post.application.dto.PostResponse;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
+import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -33,7 +34,7 @@ public class PostService {
 
     private void validateAuthenticationIsNull(final Authentication authentication) {
         if (authentication == null) {
-            throw new IllegalArgumentException("글 작성은 회원만 할 수 있습니다.");
+            throw new IllegalArgumentException("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
         }
     }
 
@@ -43,9 +44,28 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
     }
 
-    private static Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
+    private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
         return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member);
     }
+
+    public PostResponse updatePost(final Long postId, final PostUpdateRequest postUpdateRequest,
+            final Authentication authentication) {
+        validateAuthenticationIsNull(authentication);
+
+        final Member member = getMemberBy(authentication);
+        final Post post = getPostBy(postId);
+
+        post.validateAuthor(member);
+        post.update(postUpdateRequest.getTitle(), postUpdateRequest.getContents());
+
+        return PostResponse.from(post);
+    }
+
+    private Post getPostBy(final Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 게시글입니다."));
+    }
+
 
     // 테스트용 TODO 추후 삭제
     @PostConstruct
@@ -64,4 +84,5 @@ public class PostService {
 
         postRepository.saveAll(posts);
     }
+
 }

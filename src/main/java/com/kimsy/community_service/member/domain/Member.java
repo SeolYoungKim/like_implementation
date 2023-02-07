@@ -1,6 +1,7 @@
 package com.kimsy.community_service.member.domain;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
@@ -41,5 +42,24 @@ public class Member {
         this.nickname = nickname;
         this.accountType = accountType;
         this.accountId = accountId;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Member member = (Member) o;
+        return Objects.equals(id, member.id) && Objects.equals(nickname,
+                member.nickname) && accountType == member.accountType && Objects.equals(
+                accountId, member.accountId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, nickname, accountType, accountId);
     }
 }

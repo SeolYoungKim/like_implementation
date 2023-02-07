@@ -2,6 +2,7 @@ package com.kimsy.community_service.post.domain;
 
 import com.kimsy.community_service.member.domain.Member;
 import java.time.LocalDateTime;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
@@ -29,6 +30,7 @@ public class Post {
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String contents;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,13 +52,27 @@ public class Post {
         this.author = author;
     }
 
-    private void validateNullOrEmpty(final String str) {
-        if (!StringUtils.hasText(str)) {
+    private void validateNullOrEmpty(final String value) {
+        if (!StringUtils.hasText(value)) {
             throw new IllegalArgumentException("제목이나 내용은 빈 값일 수 없습니다.");
         }
     }
 
     public String getAuthorName() {
         return author.getNickname();
+    }
+
+    public void validateAuthor(final Member member) {
+        if (!author.equals(member)) {
+            throw new IllegalArgumentException("게시글 작성자가 아니면 수정/삭제 요청을 할 수 없습니다.");
+        }
+    }
+
+    public void update(final String title, final String contents) {
+        validateNullOrEmpty(title);
+        validateNullOrEmpty(contents);
+
+        this.title = title;
+        this.contents = contents;
     }
 }

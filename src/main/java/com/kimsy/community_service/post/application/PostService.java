@@ -7,6 +7,7 @@ import com.kimsy.community_service.post.application.dto.PostResponse;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
+import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -47,6 +48,25 @@ public class PostService {
         return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member);
     }
 
+    public PostResponse updatePost(final Long postId, final PostUpdateRequest postUpdateRequest,
+            final Authentication authentication) {
+        validateAuthenticationIsNull(authentication);
+
+        final Member member = getMemberBy(authentication);
+        final Post post = getPostBy(postId);
+
+        post.validateAuthor(member);
+        post.update(postUpdateRequest.getTitle(), postUpdateRequest.getContents());
+
+        return PostResponse.from(post);
+    }
+
+    private Post getPostBy(final Long postId) {
+        return postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 게시글입니다."));
+    }
+
+
     // 테스트용 TODO 추후 삭제
     @PostConstruct
     public void initData() {
@@ -64,4 +84,5 @@ public class PostService {
 
         postRepository.saveAll(posts);
     }
+
 }

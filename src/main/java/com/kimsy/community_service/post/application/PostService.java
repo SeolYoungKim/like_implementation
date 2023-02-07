@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -83,6 +85,11 @@ public class PostService {
         postRepository.delete(post);
 
         return new PostDeleteResponse(true);
+    }
+
+    public Page<PostResponse> getPosts(final Pageable pageable) {
+        return postRepository.findAll(pageable)
+                .map(PostResponse::from);
     }
 
     // 테스트용 TODO 추후 삭제

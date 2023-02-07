@@ -4,6 +4,8 @@ import com.kimsy.community_service.auth.CustomAuthentication;
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
+import com.kimsy.community_service.member.domain.Quit;
+import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
@@ -28,6 +30,7 @@ public class PostService {
 
         final Member member = getMemberBy(authentication);
         final Post post = createPostBy(postCreateRequest, member);
+
         postRepository.save(post);
 
         return PostResponse.from(post);
@@ -43,8 +46,8 @@ public class PostService {
         final CustomAuthentication auth = (CustomAuthentication) authentication;
         final Member member = memberRepository.findByAccountId(auth.getAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
-
         member.validateAccountType(auth.getAccountType());
+
         return member;
     }
 
@@ -86,9 +89,9 @@ public class PostService {
     @PostConstruct
     public void initData() {
         final List<Member> members = Arrays.asList(
-                new Member("중개사임", AccountType.REALTOR, 47L),
-                new Member("갓물주", AccountType.LESSOR, 21L),
-                new Member("월세좀싸게해주세요", AccountType.LESSEE, 562L));
+                new Member("중개사임", AccountType.REALTOR, 47L, Quit.NO),
+                new Member("갓물주", AccountType.LESSOR, 21L, Quit.NO),
+                new Member("월세좀싸게해주세요", AccountType.LESSEE, 562L, Quit.NO));
 
         memberRepository.saveAll(members);
 
@@ -99,5 +102,4 @@ public class PostService {
 
         postRepository.saveAll(posts);
     }
-
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
+import com.kimsy.community_service.member.domain.Quit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class PostTest {
-    private static final Member member = new Member("nickName", AccountType.LESSEE, 512L);
+    private static final Member member = new Member("nickName", AccountType.LESSEE, 512L, Quit.NO);
 
     @DisplayName("객체를 생성할 때")
     @Nested
@@ -73,7 +74,7 @@ class PostTest {
         @DisplayName("게시글의 저자가 아닐 경우 예외를 발생시킨다.")
         @Test
         void fail() {
-            final Member notAuthor = new Member("임대인", AccountType.LESSOR, 34L);
+            final Member notAuthor = new Member("임대인", AccountType.LESSOR, 34L, Quit.NO);
             assertThatThrownBy(() -> post.validateAuthor(notAuthor))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("게시글 작성자가 아니면 수정/삭제 요청을 할 수 없습니다.");

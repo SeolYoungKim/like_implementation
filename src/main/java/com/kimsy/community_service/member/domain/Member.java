@@ -44,6 +44,12 @@ public class Member {
         this.accountId = accountId;
     }
 
+    public void validateAccountType(final AccountType accountType) {
+        if (this.accountType != accountType) {
+            throw new IllegalArgumentException("해당 회원의 AccountType과 일치하지 않습니다.");
+        }
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

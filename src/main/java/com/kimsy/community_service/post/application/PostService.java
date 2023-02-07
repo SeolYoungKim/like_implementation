@@ -1,5 +1,6 @@
 package com.kimsy.community_service.post.application;
 
+import com.kimsy.community_service.auth.CustomAuthentication;
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
@@ -42,6 +43,9 @@ public class PostService {
         final CustomAuthentication auth = (CustomAuthentication) authentication;
         final Member member = memberRepository.findByAccountId(auth.getAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
+
+        member.validateAccountType(auth.getAccountType());
+        return member;
     }
 
     private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {

@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.util.StringUtils;
 
 @Getter
 @EntityListeners(AuditingEntityListener.class)
@@ -41,9 +42,18 @@ public class Post {
     private LocalDateTime modifiedAt;
 
     public Post(final String title, final String contents, final Member author) {
+        validateNullOrEmpty(title);
+        validateNullOrEmpty(contents);
+
         this.title = title;
         this.contents = contents;
         this.author = author;
+    }
+
+    private void validateNullOrEmpty(final String str) {
+        if (!StringUtils.hasText(str)) {
+            throw new IllegalArgumentException("제목이나 내용은 빈 값일 수 없습니다.");
+        }
     }
 
     public String getAuthorName() {

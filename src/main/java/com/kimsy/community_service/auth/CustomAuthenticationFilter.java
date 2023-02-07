@@ -6,9 +6,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -17,7 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private static final String HTTP_HEADER_AUTHENTICATION = "Authentication";
-    private static final String BLANK = "";
 
     @Override
     protected void doFilterInternal(final HttpServletRequest request,
@@ -37,9 +34,8 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     private static void registerAuthenticationToSecurityContextHolder(
             final AuthenticationToken authenticationToken) {
-        final Authentication authentication = new UsernamePasswordAuthenticationToken(
-                authenticationToken.getAccountId(), BLANK,
-                AuthorityUtils.createAuthorityList(authenticationToken.getAccountType()));
+        final Authentication authentication = new CustomAuthentication(
+                authenticationToken.getAccountId(), authenticationToken.getAccountType());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }

@@ -141,7 +141,7 @@ class PostServiceTest {
         @DisplayName("게시글 작성자가 아닌 경우 예외를 발생시킨다.")
         @Test
         void failByNotAuthor() {
-            final Member notAuthor = new Member("임대인", AccountType.LESSOR, 34L);
+            final Member notAuthor = new Member("notAuthor", AccountType.REALTOR, 34L);
 
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(notAuthor));
             when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));

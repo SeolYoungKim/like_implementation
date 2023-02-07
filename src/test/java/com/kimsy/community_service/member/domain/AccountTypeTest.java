@@ -12,7 +12,7 @@ class AccountTypeTest {
     @ParameterizedTest(name = "입력={0}")
     @ValueSource(strings = {"Realtor", "Lessor", "Lessee"})
     void supportedRole(String role) {
-        AccountType.validateSupportOrNot(role);
+        AccountType.from(role);
     }
 
     @DisplayName("지원되지 않는 역할일 경우 예외가 발생한다.")
@@ -20,7 +20,7 @@ class AccountTypeTest {
     @ValueSource(strings = {"REALTOR", "lessor", "LESSEE", "guest", "User"})
     @NullAndEmptySource
     void notSupportedRole(String role) {
-        assertThatThrownBy(() -> AccountType.validateSupportOrNot(role))
+        assertThatThrownBy(() -> AccountType.from(role))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("지원되지 않는 역할입니다.");
     }

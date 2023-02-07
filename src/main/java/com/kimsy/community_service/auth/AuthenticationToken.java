@@ -5,14 +5,13 @@ import lombok.Getter;
 
 @Getter
 public class AuthenticationToken {
-    private final String accountType;
+    private final AccountType accountType;
     private final Long accountId;
 
     public AuthenticationToken(final String token) {
         final String[] parsedToken = parseToken(token);
-        AccountType.validateSupportOrNot(parsedToken[0]);
 
-        this.accountType = parsedToken[0];
+        this.accountType = AccountType.from(parsedToken[0]);
         this.accountId = toLong(parsedToken[1]);
     }
 

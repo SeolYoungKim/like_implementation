@@ -26,6 +26,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         final String token = request.getHeader(HTTP_HEADER_AUTHENTICATION);
         if (token == null) {
             filterChain.doFilter(request, response);
+            return;
         }
 
         final AuthenticationToken authenticationToken = new AuthenticationToken(token);

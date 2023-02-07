@@ -19,7 +19,7 @@ public enum AccountType {
                     accountType -> accountType));
 
     public static void validateSupportOrNot(final String tokenValue) {
-        if (!StringUtils.hasText(tokenValue) && !TOKEN_VALUE_ACCOUNT_TYPE.containsKey(tokenValue)) {
+        if (!StringUtils.hasText(tokenValue) || !TOKEN_VALUE_ACCOUNT_TYPE.containsKey(tokenValue)) {
             throw new IllegalArgumentException("지원되지 않는 역할입니다.");
         }
     }

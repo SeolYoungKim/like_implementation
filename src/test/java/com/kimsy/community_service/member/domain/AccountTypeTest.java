@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class AccountTypeTest {
     @DisplayName("지원되는 역할일 경우 예외가 발생하지 않는다.")
     @ParameterizedTest(name = "입력={0}")
-    @ValueSource(strings = {"Realtor", "Lessor", "Lessee", "Guest"})
+    @ValueSource(strings = {"Realtor", "Lessor", "Lessee"})
     void supportedRole(String role) {
         AccountType.validateSupportOrNot(role);
     }

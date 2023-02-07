@@ -9,6 +9,8 @@ import com.kimsy.community_service.auth.MockAuthentication;
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
+import com.kimsy.community_service.member.domain.Quit;
+import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
@@ -39,7 +41,7 @@ class PostServiceTest {
     @BeforeEach
     void setUp() {
         mockAuth = new MockAuthentication();
-        member = new Member("중개사임", AccountType.REALTOR, 47L);
+        member = new Member("중개사임", AccountType.REALTOR, 47L, Quit.NO);
         postService = new PostService(postRepository, memberRepository);
     }
 
@@ -141,7 +143,7 @@ class PostServiceTest {
         @DisplayName("게시글 작성자가 아닌 경우 예외를 발생시킨다.")
         @Test
         void failByNotAuthor() {
-            final Member notAuthor = new Member("notAuthor", AccountType.REALTOR, 34L);
+            final Member notAuthor = new Member("notAuthor", AccountType.REALTOR, 34L, Quit.NO);
 
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(notAuthor));
             when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));

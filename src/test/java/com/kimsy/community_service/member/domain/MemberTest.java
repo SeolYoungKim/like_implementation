@@ -11,7 +11,7 @@ class MemberTest {
 
     @BeforeEach
     void setUp() {
-        member = new Member("공인중개사", AccountType.REALTOR, 47L);
+        member = new Member("공인중개사", AccountType.REALTOR, 47L, Quit.NO);
     }
 
     @DisplayName("AccountType이 일치하면 예외가 발생하지 않는다.")

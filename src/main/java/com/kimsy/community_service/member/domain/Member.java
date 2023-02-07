@@ -32,16 +32,21 @@ public class Member {
 
     private Long accountId;
 
+    @Enumerated(EnumType.STRING)
+    private Quit quit;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     private LocalDateTime modifiedAt;
 
-    public Member(final String nickname, final AccountType accountType, final Long accountId) {
+    public Member(final String nickname, final AccountType accountType, final Long accountId,
+            final Quit quit) {
         this.nickname = nickname;
         this.accountType = accountType;
         this.accountId = accountId;
+        this.quit = quit;
     }
 
     public void validateAccountType(final AccountType accountType) {

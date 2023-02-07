@@ -70,6 +70,17 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("없는 게시글입니다."));
     }
 
+    public PostDeleteResponse deletePost(final Long postId, final Authentication authentication) {
+        validateAuthenticationIsNull(authentication);
+
+        final Member member = getMemberBy(authentication);
+        final Post post = getPostBy(postId);
+
+        post.validateAuthor(member);
+        postRepository.delete(post);
+
+        return new PostDeleteResponse(true);
+    }
 
     // 테스트용 TODO 추후 삭제
     @PostConstruct

@@ -62,6 +62,10 @@ public class Post {
         return author.getNickname();
     }
 
+    public String getAccountType() {
+        return author.getKorAccountType();
+    }
+
     public void validateAuthor(final Member member) {
         if (!author.equals(member)) {
             throw new IllegalArgumentException("게시글 작성자가 아니면 수정/삭제 요청을 할 수 없습니다.");

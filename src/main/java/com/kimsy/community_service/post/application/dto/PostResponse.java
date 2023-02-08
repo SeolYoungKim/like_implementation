@@ -12,7 +12,7 @@ public class PostResponse {
                 .id(post.getId())
                 .title(post.getTitle())
                 .contents(post.getContents())
-                .authorName(post.getAuthorName())
+                .author(String.format("%s(%s)", post.getAuthorName(), post.getAccountType()))
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();
@@ -21,7 +21,7 @@ public class PostResponse {
     private final Long id;
     private final String title;
     private final String contents;
-    private final String authorName;
+    private final String author;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
@@ -30,14 +30,14 @@ public class PostResponse {
             final Long id,
             final String title,
             final String contents,
-            final String authorName,
+            final String author,
             final LocalDateTime createdAt,
             final LocalDateTime modifiedAt
     ) {
         this.id = id;
         this.title = title;
         this.contents = contents;
-        this.authorName = authorName;
+        this.author = author;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }

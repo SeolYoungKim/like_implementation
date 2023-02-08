@@ -12,6 +12,7 @@ import com.kimsy.community_service.member.domain.MemberRepository;
 import com.kimsy.community_service.member.domain.Quit;
 import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
+import com.kimsy.community_service.post.domain.Delete;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
@@ -54,7 +55,7 @@ class PostServiceTest {
 
     @DisplayName("게시글을 생성할 때")
     @Nested
-    class Create {
+    class CreatePost {
         @DisplayName("올바른 값이 넘어왔을 경우 게시글이 생성된다.")
         @Test
         void success() {
@@ -92,7 +93,7 @@ class PostServiceTest {
 
     @DisplayName("게시글을 수정할 때")
     @Nested
-    class Update {
+    class UpdatePost {
         private final Long postId = 100L;
         private final String expectedTitle = "제목";
         private final String expectedContents = "내용";
@@ -102,7 +103,7 @@ class PostServiceTest {
 
         @BeforeEach
         void setUp() {
-            post = new Post("title", "contents", member);
+            post = new Post("title", "contents", member, Delete.NO);
             postUpdateRequest = new PostUpdateRequest(expectedTitle, expectedContents);
         }
 
@@ -163,13 +164,13 @@ class PostServiceTest {
 
     @DisplayName("게시글을 삭제할 때")
     @Nested
-    class Delete {
+    class DeletePost {
         private final Long postId = 100L;
         private Post post;
 
         @BeforeEach
         void setUp() {
-            post = new Post("title", "contents", member);
+            post = new Post("title", "contents", member, Delete.NO);
         }
 
         @DisplayName("올바른 값이 넘어왔을 경우 게시글이 삭제된다.")
@@ -179,6 +180,7 @@ class PostServiceTest {
             when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
 
             final PostDeleteResponse postResponse = postService.deletePost(postId, mockAuth);
+            assertThat(post.getDelete()).isEqualTo(Delete.YES);
             assertThat(postResponse.isDeleted()).isTrue();
         }
 
@@ -227,7 +229,7 @@ class PostServiceTest {
 
     @DisplayName("게시글을 조회할 때")
     @Nested
-    class Read {
+    class ReadPost {
         private final Member member = new Member("중개사", AccountType.REALTOR, 47L, Quit.NO);
 
         @DisplayName("단건 조회 요청을 할 경우, 단건의 게시글이 조회된다.")
@@ -235,7 +237,7 @@ class PostServiceTest {
         void getPost() {
             final String expectedTitle = "title";
             final String expectedContents = "contents";
-            final Post post = new Post(expectedTitle, expectedContents, member);
+            final Post post = new Post(expectedTitle, expectedContents, member, Delete.NO);
             when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
 
             final Long anyPostId = 100L;
@@ -249,7 +251,7 @@ class PostServiceTest {
         @Test
         void getPosts() {
             final List<Post> posts = IntStream.rangeClosed(1, 10)
-                    .mapToObj(i -> new Post("title" + i, "contents" + i, member))
+                    .mapToObj(i -> new Post("title" + i, "contents" + i, member, Delete.NO))
                     .collect(Collectors.toList());
 
             final Pageable pageable = PageRequest.of(0, 10);

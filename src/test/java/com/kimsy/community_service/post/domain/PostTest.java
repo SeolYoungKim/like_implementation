@@ -21,14 +21,14 @@ class PostTest {
         @DisplayName("올바른 값이 넘어오는 경우 예외가 발생하지 않는다.")
         @Test
         void success() {
-            new Post("title", "contents", member);
+            new Post("title", "contents", member, Delete.NO);
         }
 
         @DisplayName("제목이나 내용이 넘어오지 않는 경우 예외가 발생한다.")
         @ParameterizedTest
         @CsvSource({",contents", "title,", ",", "'',''", "'',contents", "title,''"})
         void fail(String title, String contents) {
-            assertThatThrownBy(() -> new Post(title, contents, member))
+            assertThatThrownBy(() -> new Post(title, contents, member, Delete.NO))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("제목이나 내용은 빈 값일 수 없습니다.");
         }
@@ -37,7 +37,7 @@ class PostTest {
     @DisplayName("객체를 수정할 때")
     @Nested
     class Update {
-        private final Post post = new Post("title", "contents", member);
+        private final Post post = new Post("title", "contents", member, Delete.NO);
 
         @DisplayName("올바른 값이 넘어오는 경우 예외가 발생하지 않고, Post의 제목과 내용이 수정된다.")
         @Test
@@ -63,7 +63,7 @@ class PostTest {
     @DisplayName("게시글의 저자인지 확인할 때")
     @Nested
     class ValidateAuthor {
-        private final Post post = new Post("title", "contents", member);
+        private final Post post = new Post("title", "contents", member, Delete.NO);
 
         @DisplayName("게시글의 저자일 경우 예외가 발생하지 않는다.")
         @Test

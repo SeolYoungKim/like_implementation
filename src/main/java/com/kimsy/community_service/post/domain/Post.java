@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -37,19 +39,25 @@ public class Post {
     @JoinColumn(name = "member_id")
     private Member author;
 
+    @Enumerated(EnumType.STRING)
+    private Delete delete;
+
     @CreatedDate
     private LocalDateTime createdAt;
 
     @LastModifiedDate
     private LocalDateTime modifiedAt;
 
-    public Post(final String title, final String contents, final Member author) {
+    private LocalDateTime deletedAt;
+
+    public Post(final String title, final String contents, final Member author, final Delete delete) {
         validateNullOrEmpty(title);
         validateNullOrEmpty(contents);
 
         this.title = title;
         this.contents = contents;
         this.author = author;
+        this.delete = delete;
     }
 
     private void validateNullOrEmpty(final String value) {
@@ -62,7 +70,7 @@ public class Post {
         return author.getNickname();
     }
 
-    public String getAccountType() {
+    public String getKorAccountType() {
         return author.getKorAccountType();
     }
 
@@ -78,5 +86,16 @@ public class Post {
 
         this.title = title;
         this.contents = contents;
+    }
+
+    public void validateDeletedAlready() {
+        if (delete == Delete.YES) {
+            throw new IllegalArgumentException("이미 삭제된 게시글 입니다.");
+        }
+    }
+
+    public void delete() {
+        delete = Delete.YES;
+        deletedAt = LocalDateTime.now();
     }
 }

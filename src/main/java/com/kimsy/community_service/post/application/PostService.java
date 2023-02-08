@@ -7,6 +7,7 @@ import com.kimsy.community_service.member.domain.MemberRepository;
 import com.kimsy.community_service.member.domain.Quit;
 import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
+import com.kimsy.community_service.post.domain.Delete;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
@@ -18,7 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 public class PostService {
     private final PostRepository postRepository;
@@ -58,7 +61,8 @@ public class PostService {
     }
 
     private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
-        return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member);
+        return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member,
+                Delete.NO);
     }
 
     public PostResponse updatePost(final Long postId, final PostUpdateRequest postUpdateRequest,
@@ -86,14 +90,22 @@ public class PostService {
         final Post post = getPostBy(postId);
 
         post.validateAuthor(member);
-        postRepository.delete(post);
+        post.validateDeletedAlready();
+        post.delete();
 
         return new PostDeleteResponse(true);
     }
 
+    @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(final Pageable pageable) {
         return postRepository.findAll(pageable)
                 .map(PostResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public PostResponse getPost(final Long postId) {
+        final Post post = getPostBy(postId);
+        return PostResponse.from(post);
     }
 
     // 테스트용 TODO 추후 삭제
@@ -107,9 +119,9 @@ public class PostService {
         memberRepository.saveAll(members);
 
         final List<Post> posts = Arrays.asList(
-                new Post("중개사 너무 힘들다", "돈좀 많이벌고싶다.", members.get(0)),
-                new Post("갓물주도 힘들다 ㅠ", "세금좀 내려주라..", members.get(1)),
-                new Post("배부른 소리들 하네", "전세 사기나 치지마.. 월세도 개비쌈;", members.get(2)));
+                new Post("중개사 너무 힘들다", "돈좀 많이벌고싶다.", members.get(0), Delete.NO),
+                new Post("갓물주도 힘들다 ㅠ", "세금좀 내려주라..", members.get(1), Delete.NO),
+                new Post("배부른 소리들 하네", "전세 사기나 치지마.. 월세도 개비쌈;", members.get(2), Delete.NO));
 
         postRepository.saveAll(posts);
     }

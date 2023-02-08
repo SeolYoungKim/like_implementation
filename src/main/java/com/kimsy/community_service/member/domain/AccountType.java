@@ -8,7 +8,7 @@ import org.springframework.util.StringUtils;
 
 @Getter
 public enum AccountType {
-    REALTOR("Realtor", "공인 중개사"),
+    REALTOR("Realtor", "공인중개사"),
     LESSOR("Lessor", "임대인"),
     LESSEE("Lessee", "임차인"),
     ;

@@ -55,6 +55,10 @@ public class Member {
         }
     }
 
+    public String getKorAccountType() {
+        return accountType.getKorAccountType();
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

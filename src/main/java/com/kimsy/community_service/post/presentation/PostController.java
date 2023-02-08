@@ -28,12 +28,6 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping("/posts")
-    public Page<PostResponse> getPosts(
-            @PageableDefault(sort = "id", direction = Direction.DESC) Pageable pageable) {
-        return postService.getPosts(pageable);
-    }
-
     @PostMapping("/posts")
     public PostResponse createPost(@RequestBody PostCreateRequest postCreateRequest,
             Authentication authentication) {
@@ -49,5 +43,16 @@ public class PostController {
     @DeleteMapping("/posts/{postId}")
     public PostDeleteResponse deletePost(@PathVariable Long postId, Authentication authentication) {
         return postService.deletePost(postId, authentication);
+    }
+
+    @GetMapping("/posts")
+    public Page<PostResponse> getPosts(
+            @PageableDefault(sort = "id", direction = Direction.DESC) Pageable pageable) {
+        return postService.getPosts(pageable);
+    }
+
+    @GetMapping("/posts/{postId}")
+    public PostResponse getPost(@PathVariable Long postId) {
+        return postService.getPost(postId);
     }
 }

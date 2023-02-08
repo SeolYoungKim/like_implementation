@@ -96,6 +96,11 @@ public class PostService {
                 .map(PostResponse::from);
     }
 
+    public PostResponse getPost(final Long postId) {
+        final Post post = getPostBy(postId);
+        return PostResponse.from(post);
+    }
+
     // 테스트용 TODO 추후 삭제
     @PostConstruct
     public void initData() {

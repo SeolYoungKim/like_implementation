@@ -14,17 +14,21 @@ import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
 import java.util.Arrays;
 import java.util.List;
 import javax.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
 public class PostService {
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+
+    public PostService(final PostRepository postRepository,
+            final MemberRepository memberRepository) {
+        this.postRepository = postRepository;
+        this.memberRepository = memberRepository;
+    }
 
     public PostResponse createPost(final PostCreateRequest postCreateRequest,
             final Authentication authentication) {

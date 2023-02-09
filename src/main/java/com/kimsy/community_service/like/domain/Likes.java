@@ -38,12 +38,13 @@ public class Likes {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;
 
     @Enumerated(EnumType.STRING)
     private LikeStatus likeStatus;
@@ -54,12 +55,24 @@ public class Likes {
     @LastModifiedDate
     private LocalDateTime modifiedAt;
 
-    public Likes(final Post post, final Member member, final LikeStatus likeStatus) {
-        this.post = post;
+    public Likes(final Member member, final Post post, final LikeStatus likeStatus) {
         this.member = member;
+        this.post = post;
         this.likeStatus = likeStatus;
 
         post.addLikes(this);
         member.addLikes(this);
+    }
+
+    public void updateStatusToDislike() {
+        likeStatus = LikeStatus.DISLIKE;
+    }
+
+    public boolean isDislike() {
+        return likeStatus == LikeStatus.DISLIKE;
+    }
+
+    public void updateStatusToLike() {
+        likeStatus = LikeStatus.LIKE;
     }
 }

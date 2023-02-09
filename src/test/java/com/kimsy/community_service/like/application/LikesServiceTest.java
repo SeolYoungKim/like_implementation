@@ -1,10 +1,13 @@
 package com.kimsy.community_service.like.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.kimsy.community_service.auth.MockAuthentication;
+import com.kimsy.community_service.like.domain.LikeStatus;
+import com.kimsy.community_service.like.domain.Likes;
 import com.kimsy.community_service.like.domain.LikesRepository;
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
@@ -97,6 +100,52 @@ class LikesServiceTest {
             assertThatThrownBy(() -> likesService.likePost(anyPostId, mockAuthentication))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("게시글 당 좋아요는 한 번만 누를 수 있습니다.");
+        }
+    }
+
+    @DisplayName("좋아요 취소 요청이 들어왔을 때")
+    @Nested
+    class LikesToDislike {
+        @DisplayName("좋아요가 LIKE 상태인 경우(좋아요가 눌러져 있는 경우) DISLIKE 상태로 변경되고 예외가 발생하지 않는다.")
+        @Test
+        void success() {
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+
+            final Likes likes = new Likes(member, post, LikeStatus.LIKE);
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.of(likes));
+
+            likesService.dislikePost(anyPostId, mockAuthentication);
+            assertThat(likes.getLikeStatus()).isEqualTo(LikeStatus.DISLIKE);
+        }
+
+        @DisplayName("좋아요가 DISLIKE 상태인 경우 예외를 발생시킨다.")
+        @Test
+        void failByAlreadyDisliked() {
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+
+            final Likes likes = new Likes(member, post, LikeStatus.DISLIKE);
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.of(likes));
+
+            assertThatThrownBy(() -> likesService.dislikePost(anyPostId, mockAuthentication))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("이미 좋아요를 취소한 게시글입니다.");
+        }
+
+        @DisplayName("좋아요를 누른적도 없는 경우 예외를 발생시킨다.")
+        @Test
+        void failByNotFoundLikes() {
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> likesService.dislikePost(anyPostId, mockAuthentication))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("누르지 않은 좋아요는 취소할 수 없습니다.");
         }
     }
 }

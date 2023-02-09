@@ -3,6 +3,7 @@ package com.kimsy.community_service.post.presentation;
 import com.kimsy.community_service.post.application.PostService;
 import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
+import com.kimsy.community_service.post.application.dto.PostsPageResponse;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
 import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,7 @@ public class PostController {
     }
 
     @GetMapping("/posts")
-    public Page<PostResponse> getPosts(
+    public Page<PostsPageResponse> getPosts(
             @PageableDefault(sort = "id", direction = Direction.DESC) Pageable pageable) {
         return postService.getPosts(pageable);
     }

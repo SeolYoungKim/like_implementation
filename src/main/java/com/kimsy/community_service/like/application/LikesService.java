@@ -10,7 +10,9 @@ import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Service
 public class LikesService {
     private final LikesRepository likesRepository;

@@ -6,43 +6,35 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-public class PostResponse {
-    public static PostResponse from(final Post post) {
-        return PostResponse.builder()
+public class PostsPageResponse {
+    public static PostsPageResponse from(final Post post) {
+        return PostsPageResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
-                .contents(post.getContents())
                 .author(String.format("%s(%s)", post.getAuthorName(), post.getKorAccountType()))
-                .likes(post.getLikesCount())
                 .createdAt(post.getCreatedAt())
-                .modifiedAt(post.getModifiedAt())
+                .likes(post.getLikesCount())
                 .build();
     }
 
     private final Long id;
     private final String title;
-    private final String contents;
     private final String author;
-    private final Integer likes;
     private final LocalDateTime createdAt;
-    private final LocalDateTime modifiedAt;
+    private final Integer likes;
 
     @Builder
-    public PostResponse(
+    public PostsPageResponse(
             final Long id,
             final String title,
-            final String contents,
             final String author,
-            final Integer likes,
             final LocalDateTime createdAt,
-            final LocalDateTime modifiedAt
+            final Integer likes
     ) {
         this.id = id;
         this.title = title;
-        this.contents = contents;
         this.author = author;
-        this.likes = likes;
         this.createdAt = createdAt;
-        this.modifiedAt = modifiedAt;
+        this.likes = likes;
     }
 }

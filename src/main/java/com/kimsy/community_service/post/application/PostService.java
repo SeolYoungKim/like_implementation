@@ -52,26 +52,6 @@ public class PostService {
         return PostResponse.from(post);
     }
 
-    private void validateAuthenticationIsNull(final Authentication authentication) {
-        if (authentication == null) {
-            throw new IllegalArgumentException("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
-        }
-    }
-
-    private Member getMemberBy(final Authentication authentication) {
-        final CustomAuthentication auth = (CustomAuthentication) authentication;
-        final Member member = memberRepository.findByAccountId(auth.getAccountId())
-                .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
-        member.validateAccountType(auth.getAccountType());
-
-        return member;
-    }
-
-    private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
-        return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member,
-                Delete.NO);
-    }
-
     public PostResponse updatePost(final Long postId, final PostUpdateRequest postUpdateRequest,
             final Authentication authentication) {
         validateAuthenticationIsNull(authentication);
@@ -85,11 +65,6 @@ public class PostService {
         return PostResponse.from(post);
     }
 
-    private Post getPostBy(final Long postId) {
-        return postQueryRepository.getPostById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 게시글입니다."));
-    }
-
     public PostDeleteResponse deletePost(final Long postId, final Authentication authentication) {
         validateAuthenticationIsNull(authentication);
 
@@ -97,7 +72,6 @@ public class PostService {
         final Post post = getPostBy(postId);
 
         post.validateAuthor(member);
-        post.validateDeletedAlready();
         post.delete();
 
         return new PostDeleteResponse(true);
@@ -112,14 +86,8 @@ public class PostService {
         }
 
         final Member member = getMemberBy(authentication);
-        return posts.map(post -> {
-            final Optional<Likes> likes = likesRepository.findByMemberAndPost(member, post);
-            if (likes.isPresent()) {
-                return PostsPageResponse.from(post, likes.get().getLikeStatus());
-            }
-
-            return PostsPageResponse.from(post);
-        });
+        return posts.map(post ->
+                generateDto(member, post, PostsPageResponse::from, PostsPageResponse::from));
     }
 
     @Transactional(readOnly = true)
@@ -130,11 +98,44 @@ public class PostService {
         }
 
         final Member member = getMemberBy(authentication);
+        return generateDto(member, post, PostResponse::from, PostResponse::from);
+    }
+
+    private void validateAuthenticationIsNull(final Authentication authentication) {
+        if (authentication == null) {
+            throw new IllegalArgumentException("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
+        }
+    }
+
+    private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
+        return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member,
+                Delete.NO);
+    }
+
+    private Post getPostBy(final Long postId) {
+        return postQueryRepository.getPostById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 게시글입니다."));
+    }
+
+    private Member getMemberBy(final Authentication authentication) {
+        final CustomAuthentication auth = (CustomAuthentication) authentication;
+        final Member member = memberRepository.findByAccountId(auth.getAccountId())
+                .orElseThrow(() -> new IllegalArgumentException("없는 회원입니다."));
+        member.validateAccountType(auth.getAccountType());
+
+        return member;
+    }
+
+    private <T> T generateDto(
+            final Member member, final Post post,
+            final DtoGeneratorUsingPostAndLikeStatus<T> dtoGeneratorUsingPostAndLikeStatus,
+            final DtoGeneratorUsingOnlyPost<T> dtoGeneratorUsingOnlyPost
+    ) {
         final Optional<Likes> likes = likesRepository.findByMemberAndPost(member, post);
         if (likes.isPresent()) {
-            return PostResponse.from(post, likes.get().getLikeStatus());
+            return dtoGeneratorUsingPostAndLikeStatus.generate(post, likes.get().getLikeStatus());
         }
 
-        return PostResponse.from(post);
+        return dtoGeneratorUsingOnlyPost.generate(post);
     }
 }

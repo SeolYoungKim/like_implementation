@@ -3,6 +3,7 @@ package com.kimsy.community_service.like.domain;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.post.domain.Post;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
@@ -74,5 +75,23 @@ public class Likes {
 
     public void updateStatusToLike() {
         likeStatus = LikeStatus.LIKE;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final Likes likes = (Likes) o;
+        return Objects.equals(member, likes.member) && Objects.equals(post,
+                likes.post);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(member, post);
     }
 }

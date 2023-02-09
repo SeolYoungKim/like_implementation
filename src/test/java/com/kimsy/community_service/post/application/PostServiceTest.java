@@ -5,7 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kimsy.community_service.auth.MockAuthentication;
+import com.kimsy.community_service.like.domain.LikeStatus;
+import com.kimsy.community_service.like.domain.Likes;
+import com.kimsy.community_service.like.domain.LikesRepository;
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
@@ -44,6 +49,8 @@ class PostServiceTest {
     private PostQueryRepository postQueryRepository;
     @Mock
     private MemberRepository memberRepository;
+    @Mock
+    private LikesRepository likesRepository;
 
     private Authentication mockAuth;
     private Member member;
@@ -53,7 +60,8 @@ class PostServiceTest {
     void setUp() {
         mockAuth = new MockAuthentication();
         member = new Member("중개사임", AccountType.REALTOR, 47L, Quit.NO);
-        postService = new PostService(postRepository, postQueryRepository, memberRepository);
+        postService = new PostService(postRepository, postQueryRepository, memberRepository,
+                likesRepository);
     }
 
     @DisplayName("게시글을 생성할 때")
@@ -230,40 +238,171 @@ class PostServiceTest {
         }
     }
 
-    @DisplayName("게시글을 조회할 때")
+    @DisplayName("게시글을 단건으로 조회할 때")
     @Nested
     class ReadPost {
         private final Member member = new Member("중개사", AccountType.REALTOR, 47L, Quit.NO);
 
-        @DisplayName("단건 조회 요청을 할 경우, 단건의 게시글이 조회된다.")
+        private final String expectedTitle = "title";
+        private final String expectedContents = "contents";
+        private final Long anyPostId = 100L;
+
+        private Post post;
+
+        @BeforeEach
+        void setUp() {
+            post = new Post(expectedTitle, expectedContents, member, Delete.NO);
+        }
+
+        @DisplayName("회원이 아닌 사람이 조회할 경우, LikeStatus가 null로 표기된다.")
         @Test
-        void getPost() {
-            final String expectedTitle = "title";
-            final String expectedContents = "contents";
-            final Post post = new Post(expectedTitle, expectedContents, member, Delete.NO);
+        void getPostByGuest() {
             when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
 
-            final Long anyPostId = 100L;
-            final PostResponse postResponse = postService.getPost(anyPostId);
+            final PostResponse postResponse = postService.getPost(anyPostId, null);
 
             assertThat(postResponse.getTitle()).isEqualTo(expectedTitle);
             assertThat(postResponse.getContents()).isEqualTo(expectedContents);
+            assertThat(postResponse.getLikeStatus()).isNull();
         }
 
-        @DisplayName("여러건 조회를 할 경우, 페이징이 적용된 결과가 반환된다.")
+        @DisplayName("회원이지만 좋아요를 누르지 않은 경우, LikeStatus가 null로 표기된다.")
         @Test
-        void getPosts() {
-            final List<Post> posts = IntStream.rangeClosed(1, 10)
+        void getPostByMember1() {
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+
+            final PostResponse postResponse = postService.getPost(anyPostId, mockAuth);
+
+            assertThat(postResponse.getTitle()).isEqualTo(expectedTitle);
+            assertThat(postResponse.getContents()).isEqualTo(expectedContents);
+            assertThat(postResponse.getLikeStatus()).isNull();
+        }
+
+        @DisplayName("회원이고 좋아요를 누른 경우, LikeStatus가 LIKE로 표기된다.")
+        @Test
+        void getPostByMember2() {
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+
+            final Likes likes = new Likes(member, post, LikeStatus.LIKE);
+            when(likesRepository.findByMemberAndPost(member, post)).thenReturn(Optional.of(likes));
+
+            final PostResponse postResponse = postService.getPost(anyPostId, mockAuth);
+
+            assertThat(postResponse.getTitle()).isEqualTo(expectedTitle);
+            assertThat(postResponse.getContents()).isEqualTo(expectedContents);
+            assertThat(postResponse.getLikeStatus()).isEqualTo(LikeStatus.LIKE);
+        }
+
+        @DisplayName("회원이고 좋아요를 누른 후 취소한 경우, LikeStatus가 DISLIKE로 표기된다.")
+        @Test
+        void getPostByMember3() {
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+
+            final Likes likes = new Likes(member, post, LikeStatus.DISLIKE);
+            when(likesRepository.findByMemberAndPost(member, post)).thenReturn(Optional.of(likes));
+
+            final PostResponse postResponse = postService.getPost(anyPostId, mockAuth);
+
+            assertThat(postResponse.getTitle()).isEqualTo(expectedTitle);
+            assertThat(postResponse.getContents()).isEqualTo(expectedContents);
+            assertThat(postResponse.getLikeStatus()).isEqualTo(LikeStatus.DISLIKE);
+        }
+    }
+
+    @DisplayName("게시글을 여러건 조회할 때")
+    @Nested
+    class ReadPosts {
+        private static final String LIKE_STATUS_LIKE = "\"likeStatus\":\"LIKE\"";
+        private static final String LIKE_STATUS_DISLIKE = "\"likeStatus\":\"DISLIKE\"";
+        private static final String LIKE_STATUS_NULL = "\"likeStatus\":null";
+
+        private final ObjectMapper objectMapper = new ObjectMapper();
+
+        private Pageable pageable;
+        private Page<Post> page;
+
+        @BeforeEach
+        void setUp() {
+            pageable = PageRequest.of(0, 10);
+
+            List<Post> posts = IntStream.rangeClosed(1, 10)
                     .mapToObj(i -> new Post("title" + i, "contents" + i, member, Delete.NO))
                     .collect(Collectors.toList());
 
-            final Pageable pageable = PageRequest.of(0, 10);
-            final PageImpl<Post> page = new PageImpl<>(posts, pageable, 10);
+            page = new PageImpl<>(posts, pageable, 10);
+        }
+
+        @DisplayName("기본적으로 페이징 처리가 된다.")
+        @Test
+        void getPosts() {
             when(postQueryRepository.getPosts(any(Pageable.class))).thenReturn(page);
 
-            final Page<PostsPageResponse> postResponses = postService.getPosts(pageable);
+            final Page<PostsPageResponse> postResponses = postService.getPosts(pageable, null);
             assertThat(postResponses.getTotalPages()).isEqualTo(1);
             assertThat(postResponses.getTotalElements()).isEqualTo(10);
         }
+
+        @DisplayName("회원이 아닌 사람이 조회할 경우, LikeStatus가 null로 표기된다.")
+        @Test
+        void getPostsByGuest() throws JsonProcessingException {
+            when(postQueryRepository.getPosts(any(Pageable.class))).thenReturn(page);
+
+            final Page<PostsPageResponse> postResponses = postService.getPosts(pageable, null);
+            final String strPostResponses = objectMapper.writeValueAsString(postResponses);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_LIKE);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_DISLIKE);
+        }
+
+        @DisplayName("회원이고 모든 게시글에 좋아요를 누르지 않은 경우 LikeStatus가 null로 표기된다.")
+        @Test
+        void getPostsByMember1() throws JsonProcessingException {
+            when(postQueryRepository.getPosts(any(Pageable.class))).thenReturn(page);
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+
+            final Page<PostsPageResponse> postResponses = postService.getPosts(pageable, mockAuth);
+            final String strPostResponses = objectMapper.writeValueAsString(postResponses);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_LIKE);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_DISLIKE);
+        }
+
+        @DisplayName("회원이고 모든 게시글에 좋아요를 누른 경우 LikeStatus가 LIKE로 표기된다.")
+        @Test
+        void getPostsByMember2() throws JsonProcessingException {
+            when(postQueryRepository.getPosts(any(Pageable.class))).thenReturn(page);
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+
+            final Post fakePost = new Post("title", "contents", member, Delete.NO);
+            final Likes likes = new Likes(member, fakePost, LikeStatus.LIKE);
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.of(likes));
+
+            final Page<PostsPageResponse> postResponses = postService.getPosts(pageable, mockAuth);
+            final String strPostResponses = objectMapper.writeValueAsString(postResponses);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_NULL);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_DISLIKE);
+        }
+
+        @DisplayName("회원이고 모든 게시글에 좋아요를 눌렀다가 취소한 경우 LikeStatus가 DISLIKE로 표기된다.")
+        @Test
+        void getPostsByMember3() throws JsonProcessingException {
+            when(postQueryRepository.getPosts(any(Pageable.class))).thenReturn(page);
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+
+            final Post fakePost = new Post("title", "contents", member, Delete.NO);
+            final Likes likes = new Likes(member, fakePost, LikeStatus.DISLIKE);
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.of(likes));
+
+            final Page<PostsPageResponse> postResponses = postService.getPosts(pageable, mockAuth);
+            final String strPostResponses = objectMapper.writeValueAsString(postResponses);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_NULL);
+            assertThat(strPostResponses).doesNotContain(LIKE_STATUS_LIKE);
+        }
     }
+
+
+
 }

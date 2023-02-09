@@ -4,9 +4,7 @@ import com.kimsy.community_service.like.domain.LikeStatus;
 import com.kimsy.community_service.post.domain.Post;
 import java.time.LocalDateTime;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
 public class PostResponse {
     public static PostResponse from(final Post post) {
         return PostResponse.from(post, null);
@@ -53,5 +51,37 @@ public class PostResponse {
         this.likeStatus = likeStatus;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContents() {
+        return contents;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public Long getLikes() {
+        return likes;
+    }
+
+    public LikeStatus getLikeStatus() {
+        return likeStatus;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
     }
 }

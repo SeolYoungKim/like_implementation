@@ -1,9 +1,7 @@
 package com.kimsy.community_service.auth;
 
 import com.kimsy.community_service.member.domain.AccountType;
-import lombok.Getter;
 
-@Getter
 public class AuthenticationToken {
     private final AccountType accountType;
     private final Long accountId;
@@ -34,6 +32,14 @@ public class AuthenticationToken {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("accountId는 숫자 형식이어야 합니다.");
         }
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public Long getAccountId() {
+        return accountId;
     }
 }
 

@@ -2,11 +2,9 @@ package com.kimsy.community_service.auth;
 
 import com.kimsy.community_service.member.domain.AccountType;
 import java.util.Collection;
-import lombok.Getter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
-@Getter
 public class CustomAuthentication implements Authentication {
     private final Long accountId;
     private final AccountType accountType;
@@ -49,5 +47,13 @@ public class CustomAuthentication implements Authentication {
     @Override
     public String getName() {
         return String.valueOf(accountId);
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
     }
 }

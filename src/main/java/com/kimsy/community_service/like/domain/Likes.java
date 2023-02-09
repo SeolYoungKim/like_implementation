@@ -12,6 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +24,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "unique_post_and_number",
+                        columnNames = {"post_id", "member_id"})
+        }
+)
 @Entity
 public class Likes {
     @Id
@@ -49,5 +58,8 @@ public class Likes {
         this.post = post;
         this.member = member;
         this.likeStatus = likeStatus;
+
+        post.addLikes(this);
+        member.addLikes(this);
     }
 }

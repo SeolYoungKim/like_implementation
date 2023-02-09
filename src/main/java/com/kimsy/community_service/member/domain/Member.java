@@ -1,6 +1,10 @@
 package com.kimsy.community_service.member.domain;
 
+import com.kimsy.community_service.like.domain.Likes;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -9,14 +13,13 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-@Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -31,6 +34,9 @@ public class Member {
     private AccountType accountType;
 
     private Long accountId;
+
+    @OneToMany(mappedBy = "member")
+    private final List<Likes> likes = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Quit quit;
@@ -57,6 +63,42 @@ public class Member {
 
     public String getKorAccountType() {
         return accountType.getKorAccountType();
+    }
+
+    public void addLikes(final Likes likes) {
+        this.likes.add(likes);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public List<Likes> getLikes() {
+        return Collections.unmodifiableList(likes);
+    }
+
+    public Quit getQuit() {
+        return quit;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.kimsy.community_service.member.domain.MemberRepository;
 import com.kimsy.community_service.member.domain.Quit;
 import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
+import com.kimsy.community_service.post.application.dto.PostsPageResponse;
 import com.kimsy.community_service.post.domain.Delete;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostQueryRepository;
@@ -103,9 +104,9 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostResponse> getPosts(final Pageable pageable) {
+    public Page<PostsPageResponse> getPosts(final Pageable pageable) {
         return postQueryRepository.getPosts(pageable)
-                .map(PostResponse::from);
+                .map(PostsPageResponse::from);
     }
 
     @Transactional(readOnly = true)

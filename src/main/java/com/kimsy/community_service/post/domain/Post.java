@@ -1,7 +1,11 @@
 package com.kimsy.community_service.post.domain;
 
+import com.kimsy.community_service.like.domain.Likes;
 import com.kimsy.community_service.member.domain.Member;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -13,15 +17,14 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.util.StringUtils;
 
-@Getter
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -38,6 +41,9 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member author;
+
+    @OneToMany(mappedBy = "post")
+    private final List<Likes> likes = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Delete delete;
@@ -97,6 +103,50 @@ public class Post {
     public void delete() {
         delete = Delete.YES;
         deletedAt = LocalDateTime.now();
+    }
+
+    public void addLikes(final Likes likes) {
+        this.likes.add(likes);
+    }
+
+    public Integer getLikesCount() {
+        return likes.size();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getContents() {
+        return contents;
+    }
+
+    public Member getAuthor() {
+        return author;
+    }
+
+    public List<Likes> getLikes() {
+        return Collections.unmodifiableList(likes);
+    }
+
+    public Delete getDelete() {
+        return delete;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getModifiedAt() {
+        return modifiedAt;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
     }
 
     @Override

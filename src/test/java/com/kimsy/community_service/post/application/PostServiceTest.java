@@ -12,6 +12,7 @@ import com.kimsy.community_service.member.domain.MemberRepository;
 import com.kimsy.community_service.member.domain.Quit;
 import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
+import com.kimsy.community_service.post.application.dto.PostsPageResponse;
 import com.kimsy.community_service.post.domain.Delete;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostQueryRepository;
@@ -260,7 +261,7 @@ class PostServiceTest {
             final PageImpl<Post> page = new PageImpl<>(posts, pageable, 10);
             when(postQueryRepository.getPosts(any(Pageable.class))).thenReturn(page);
 
-            final Page<PostResponse> postResponses = postService.getPosts(pageable);
+            final Page<PostsPageResponse> postResponses = postService.getPosts(pageable);
             assertThat(postResponses.getTotalPages()).isEqualTo(1);
             assertThat(postResponses.getTotalElements()).isEqualTo(10);
         }

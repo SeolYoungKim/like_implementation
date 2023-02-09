@@ -14,6 +14,7 @@ import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
 import com.kimsy.community_service.post.domain.Delete;
 import com.kimsy.community_service.post.domain.Post;
+import com.kimsy.community_service.post.domain.PostQueryRepository;
 import com.kimsy.community_service.post.domain.PostRepository;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
 import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
@@ -38,7 +39,8 @@ import org.springframework.security.core.Authentication;
 class PostServiceTest {
     @Mock
     private PostRepository postRepository;
-
+    @Mock
+    private PostQueryRepository postQueryRepository;
     @Mock
     private MemberRepository memberRepository;
 
@@ -50,7 +52,7 @@ class PostServiceTest {
     void setUp() {
         mockAuth = new MockAuthentication();
         member = new Member("중개사임", AccountType.REALTOR, 47L, Quit.NO);
-        postService = new PostService(postRepository, memberRepository);
+        postService = new PostService(postRepository, postQueryRepository, memberRepository);
     }
 
     @DisplayName("게시글을 생성할 때")
@@ -111,7 +113,7 @@ class PostServiceTest {
         @Test
         void success() {
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
-            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
 
             final PostResponse postResponse = postService.updatePost(postId, postUpdateRequest,
                     mockAuth);
@@ -123,7 +125,7 @@ class PostServiceTest {
         @Test
         void failByNotExistPost() {
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
-            when(postRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> postService.updatePost(postId, postUpdateRequest, mockAuth))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -154,7 +156,7 @@ class PostServiceTest {
             final Member notAuthor = new Member("notAuthor", AccountType.REALTOR, 34L, Quit.NO);
 
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(notAuthor));
-            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
 
             assertThatThrownBy(() -> postService.updatePost(postId, postUpdateRequest, mockAuth))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -177,7 +179,7 @@ class PostServiceTest {
         @Test
         void success() {
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
-            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
 
             final PostDeleteResponse postResponse = postService.deletePost(postId, mockAuth);
             assertThat(post.getDelete()).isEqualTo(Delete.YES);
@@ -188,7 +190,7 @@ class PostServiceTest {
         @Test
         void failByNotExistPost() {
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
-            when(postRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -219,7 +221,7 @@ class PostServiceTest {
             final Member notAuthor = new Member("notAuthor", AccountType.REALTOR, 34L, Quit.NO);
 
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(notAuthor));
-            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
 
             assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -238,7 +240,7 @@ class PostServiceTest {
             final String expectedTitle = "title";
             final String expectedContents = "contents";
             final Post post = new Post(expectedTitle, expectedContents, member, Delete.NO);
-            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
 
             final Long anyPostId = 100L;
             final PostResponse postResponse = postService.getPost(anyPostId);
@@ -256,7 +258,7 @@ class PostServiceTest {
 
             final Pageable pageable = PageRequest.of(0, 10);
             final PageImpl<Post> page = new PageImpl<>(posts, pageable, 10);
-            when(postRepository.findAll(any(Pageable.class))).thenReturn(page);
+            when(postQueryRepository.getPosts(any(Pageable.class))).thenReturn(page);
 
             final Page<PostResponse> postResponses = postService.getPosts(pageable);
             assertThat(postResponses.getTotalPages()).isEqualTo(1);

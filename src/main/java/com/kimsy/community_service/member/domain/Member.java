@@ -77,4 +77,17 @@ public class Member {
     public int hashCode() {
         return Objects.hash(id, nickname, accountType, accountId);
     }
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", nickname='" + nickname + '\'' +
+                ", accountType=" + accountType +
+                ", accountId=" + accountId +
+                ", quit=" + quit +
+                ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
+                '}';
+    }
 }

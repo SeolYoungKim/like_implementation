@@ -9,6 +9,7 @@ import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
 import com.kimsy.community_service.post.domain.Delete;
 import com.kimsy.community_service.post.domain.Post;
+import com.kimsy.community_service.post.domain.PostQueryRepository;
 import com.kimsy.community_service.post.domain.PostRepository;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
 import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
@@ -25,11 +26,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PostService {
     private final PostRepository postRepository;
+    private final PostQueryRepository postQueryRepository;
     private final MemberRepository memberRepository;
 
-    public PostService(final PostRepository postRepository,
-            final MemberRepository memberRepository) {
+    public PostService(
+            final PostRepository postRepository,
+            final PostQueryRepository postQueryRepository,
+            final MemberRepository memberRepository
+    ) {
         this.postRepository = postRepository;
+        this.postQueryRepository = postQueryRepository;
         this.memberRepository = memberRepository;
     }
 
@@ -79,7 +85,7 @@ public class PostService {
     }
 
     private Post getPostBy(final Long postId) {
-        return postRepository.findById(postId)
+        return postQueryRepository.getPostById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 게시글입니다."));
     }
 
@@ -98,7 +104,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public Page<PostResponse> getPosts(final Pageable pageable) {
-        return postRepository.findAll(pageable)
+        return postQueryRepository.getPosts(pageable)
                 .map(PostResponse::from);
     }
 
@@ -108,7 +114,7 @@ public class PostService {
         return PostResponse.from(post);
     }
 
-    // 테스트용 TODO 추후 삭제
+    // 테스트용 Data
     @PostConstruct
     public void initData() {
         final List<Member> members = Arrays.asList(

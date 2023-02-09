@@ -2,6 +2,7 @@ package com.kimsy.community_service.post.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.kimsy.community_service.like.domain.LikesRepository;
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
@@ -31,9 +32,12 @@ class PostQueryRepositoryTest {
     private PostRepository postRepository;
     @Autowired
     private MemberRepository memberRepository;
+    @Autowired
+    private LikesRepository likesRepository;
 
     @BeforeEach
     void setUp() {
+        likesRepository.deleteAllInBatch();
         postRepository.deleteAllInBatch();
         memberRepository.deleteAllInBatch();
 

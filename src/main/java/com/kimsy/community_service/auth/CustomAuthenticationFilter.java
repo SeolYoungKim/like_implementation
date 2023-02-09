@@ -24,14 +24,14 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        final AuthenticationToken authenticationToken = new AuthenticationToken(token);
-        registerAuthenticationToSecurityContextHolder(authenticationToken);
+        registerAuthenticationToSecurityContextHolder(token);
 
         filterChain.doFilter(request, response);
     }
 
-    private static void registerAuthenticationToSecurityContextHolder(
-            final AuthenticationToken authenticationToken) {
+    private static void registerAuthenticationToSecurityContextHolder(final String token) {
+        final AuthenticationToken authenticationToken = new AuthenticationToken(token);
+
         final Authentication authentication = new CustomAuthentication(
                 authenticationToken.getAccountId(), authenticationToken.getAccountType());
 

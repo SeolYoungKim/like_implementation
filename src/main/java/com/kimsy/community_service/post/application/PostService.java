@@ -52,6 +52,11 @@ public class PostService {
         return PostResponse.from(post);
     }
 
+    private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
+        return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member,
+                Delete.NO);
+    }
+
     public PostResponse updatePost(final Long postId, final PostUpdateRequest postUpdateRequest,
             final Authentication authentication) {
         validateAuthenticationIsNull(authentication);
@@ -77,6 +82,12 @@ public class PostService {
         return new PostDeleteResponse(true);
     }
 
+    private void validateAuthenticationIsNull(final Authentication authentication) {
+        if (authentication == null) {
+            throw new IllegalArgumentException("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
+        }
+    }
+
     @Transactional(readOnly = true)
     public Page<PostsPageResponse> getPosts(final Pageable pageable,
             final Authentication authentication) {
@@ -99,17 +110,6 @@ public class PostService {
 
         final Member member = getMemberBy(authentication);
         return generateDto(member, post, PostResponse::from, PostResponse::from);
-    }
-
-    private void validateAuthenticationIsNull(final Authentication authentication) {
-        if (authentication == null) {
-            throw new IllegalArgumentException("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
-        }
-    }
-
-    private Post createPostBy(final PostCreateRequest postCreateRequest, final Member member) {
-        return new Post(postCreateRequest.getTitle(), postCreateRequest.getContents(), member,
-                Delete.NO);
     }
 
     private Post getPostBy(final Long postId) {

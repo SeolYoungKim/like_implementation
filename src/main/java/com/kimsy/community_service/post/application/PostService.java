@@ -3,10 +3,8 @@ package com.kimsy.community_service.post.application;
 import com.kimsy.community_service.auth.CustomAuthentication;
 import com.kimsy.community_service.like.domain.Likes;
 import com.kimsy.community_service.like.domain.LikesRepository;
-import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
-import com.kimsy.community_service.member.domain.Quit;
 import com.kimsy.community_service.post.application.dto.PostDeleteResponse;
 import com.kimsy.community_service.post.application.dto.PostResponse;
 import com.kimsy.community_service.post.application.dto.PostsPageResponse;
@@ -16,10 +14,7 @@ import com.kimsy.community_service.post.domain.PostQueryRepository;
 import com.kimsy.community_service.post.domain.PostRepository;
 import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
 import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import javax.annotation.PostConstruct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -141,23 +136,5 @@ public class PostService {
         }
 
         return PostResponse.from(post);
-    }
-
-    // 테스트용 Data
-    @PostConstruct
-    public void initData() {
-        final List<Member> members = Arrays.asList(
-                new Member("중개사임", AccountType.REALTOR, 47L, Quit.NO),
-                new Member("갓물주", AccountType.LESSOR, 21L, Quit.NO),
-                new Member("월세좀싸게해주세요", AccountType.LESSEE, 562L, Quit.NO));
-
-        memberRepository.saveAll(members);
-
-        final List<Post> posts = Arrays.asList(
-                new Post("중개사 너무 힘들다", "돈좀 많이벌고싶다.", members.get(0), Delete.NO),
-                new Post("갓물주도 힘들다 ㅠ", "세금좀 내려주라..", members.get(1), Delete.NO),
-                new Post("배부른 소리들 하네", "전세 사기나 치지마.. 월세도 너무비쌈;", members.get(2), Delete.NO));
-
-        postRepository.saveAll(posts);
     }
 }

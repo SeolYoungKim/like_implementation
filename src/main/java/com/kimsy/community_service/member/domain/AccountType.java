@@ -3,10 +3,8 @@ package com.kimsy.community_service.member.domain;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import org.springframework.util.StringUtils;
 
-@Getter
 public enum AccountType {
     REALTOR("Realtor", "공인중개사"),
     LESSOR("Lessor", "임대인"),
@@ -32,5 +30,9 @@ public enum AccountType {
     AccountType(final String tokenValue, final String korAccountType) {
         this.tokenValue = tokenValue;
         this.korAccountType = korAccountType;
+    }
+
+    public String getKorAccountType() {
+        return korAccountType;
     }
 }

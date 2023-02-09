@@ -29,9 +29,7 @@ public class LikesService {
 
     public void likePost(final Long postId, final Authentication authentication) {
         validateAuthenticationIsNull(authentication);
-
-        final Likes likes = createLikes(postId, authentication);
-        likesRepository.save(likes);
+        createOrUpdateLikes(postId, authentication);
     }
 
     private void validateAuthenticationIsNull(final Authentication authentication) {
@@ -40,12 +38,23 @@ public class LikesService {
         }
     }
 
-    private Likes createLikes(final Long postId, final Authentication authentication) {
+    private void createOrUpdateLikes(final Long postId, final Authentication authentication) {
         final Member member = getMemberBy(authentication);
         final Post post = getPostBy(postId);
-        validateDuplicationOfLikes(member, post);
 
-        return new Likes(post, member, LikeStatus.LIKE);
+        final Optional<Likes> opLikes = likesRepository.findByMemberAndPost(member, post);
+        if (opLikes.isPresent()) {
+            final Likes likes = opLikes.get();
+            if (likes.isDislike()) {
+                likes.updateStatusToLike();
+                return;
+            }
+
+            // Likes가 존재하고 LikeStatus가 LIKE인 경우 예외 던짐
+            throw new IllegalArgumentException("게시글 당 좋아요는 한 번만 누를 수 있습니다.");
+        }
+
+        likesRepository.save(new Likes(member, post, LikeStatus.LIKE));
     }
 
     private Member getMemberBy(final Authentication authentication) {

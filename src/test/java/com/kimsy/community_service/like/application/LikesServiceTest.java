@@ -49,15 +49,29 @@ class LikesServiceTest {
     @DisplayName("좋아요 생성 요청이 들어왔을 때")
     @Nested
     class CreateLikes {
-        @DisplayName("올바른 값이 전달될 경우 예외가 발생하지 않는다.")
+        @DisplayName("새롭게 좋아요를 누르는 경우 예외가 발생하지 않는다.")
         @Test
-        void success() {
+        void successByCreateLikes() {
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
             when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
-            when(likesRepository.existsByMemberAndPost(any(Member.class),
-                    any(Post.class))).thenReturn(false);
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.empty());
 
             likesService.likePost(anyPostId, mockAuthentication);
+        }
+
+        @DisplayName("좋아요를 누른 뒤 싫어요를 눌러서 상태가 변경되었던 경우, 다시 좋아요로 상태가 변경된다.")
+        @Test
+        void successByUpdateLikesDislikeToLike() {
+            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
+            when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
+
+            final Likes likes = new Likes(member, post, LikeStatus.DISLIKE);
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.of(likes));
+
+            likesService.likePost(anyPostId, mockAuthentication);
+            assertThat(likes.getLikeStatus()).isEqualTo(LikeStatus.LIKE);
         }
 
         @DisplayName("회원이 아닌 사람이 요청한 경우, 즉 Authentication이 null로 넘어올 경우 예외를 발생시킨다.")
@@ -94,8 +108,10 @@ class LikesServiceTest {
         void failByDuplicatedLikes() {
             when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
             when(postRepository.findById(any(Long.class))).thenReturn(Optional.of(post));
-            when(likesRepository.existsByMemberAndPost(any(Member.class),
-                    any(Post.class))).thenReturn(true);
+
+            final Likes likes = new Likes(member, post, LikeStatus.LIKE);
+            when(likesRepository.findByMemberAndPost(any(Member.class), any(Post.class)))
+                    .thenReturn(Optional.of(likes));
 
             assertThatThrownBy(() -> likesService.likePost(anyPostId, mockAuthentication))
                     .isInstanceOf(IllegalArgumentException.class)

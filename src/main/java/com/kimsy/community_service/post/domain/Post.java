@@ -95,15 +95,16 @@ public class Post {
         this.contents = contents;
     }
 
-    public void validateDeletedAlready() {
+    public void delete() {
+        validateDeletedAlready();
+        delete = Delete.YES;
+        deletedAt = LocalDateTime.now();
+    }
+
+    private void validateDeletedAlready() {
         if (delete == Delete.YES) {
             throw new IllegalArgumentException("이미 삭제된 게시글 입니다.");
         }
-    }
-
-    public void delete() {
-        delete = Delete.YES;
-        deletedAt = LocalDateTime.now();
     }
 
     public void addLikes(final Likes likes) {

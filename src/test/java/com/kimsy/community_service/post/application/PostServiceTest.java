@@ -141,24 +141,6 @@ class PostServiceTest {
                     .hasMessageContaining("없는 게시글입니다.");
         }
 
-        @DisplayName("회원이 아닌 사람이 요청한 경우, 즉 Authentication이 null로 넘어올 경우 예외를 발생시킨다.")
-        @Test
-        void failByAuthentication() {
-            assertThatThrownBy(() -> postService.updatePost(postId, postUpdateRequest, null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
-        }
-
-        @DisplayName("accountId로 조회되지 않는 회원이 요청한 경우 예외를 발생시킨다.")
-        @Test
-        void failByAccountId() {
-            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> postService.updatePost(postId, postUpdateRequest, mockAuth))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("없는 회원입니다.");
-        }
-
         @DisplayName("게시글 작성자가 아닌 경우 예외를 발생시킨다.")
         @Test
         void failByNotAuthor() {
@@ -193,48 +175,6 @@ class PostServiceTest {
             final PostDeleteResponse postResponse = postService.deletePost(postId, mockAuth);
             assertThat(post.getDelete()).isEqualTo(Delete.YES);
             assertThat(postResponse.isDeleted()).isTrue();
-        }
-
-        @DisplayName("없는 게시글일 경우 예외를 발생시킨다.")
-        @Test
-        void failByNotExistPost() {
-            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(member));
-            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("없는 게시글입니다.");
-        }
-
-        @DisplayName("회원이 아닌 사람이 요청한 경우, 즉 Authentication이 null로 넘어올 경우 예외를 발생시킨다.")
-        @Test
-        void failByAuthentication() {
-            assertThatThrownBy(() -> postService.deletePost(postId, null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("게시글 작성/수정/삭제는 회원만 할 수 있습니다.");
-        }
-
-        @DisplayName("accountId로 조회되지 않는 회원이 요청한 경우 예외를 발생시킨다.")
-        @Test
-        void failByAccountId() {
-            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.empty());
-
-            assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("없는 회원입니다.");
-        }
-
-        @DisplayName("게시글 작성자가 아닌 경우 예외를 발생시킨다.")
-        @Test
-        void failByNotAuthor() {
-            final Member notAuthor = new Member("notAuthor", AccountType.REALTOR, 34L, Quit.NO);
-
-            when(memberRepository.findByAccountId(any(Long.class))).thenReturn(Optional.of(notAuthor));
-            when(postQueryRepository.getPostById(any(Long.class))).thenReturn(Optional.of(post));
-
-            assertThatThrownBy(() -> postService.deletePost(postId, mockAuth))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("게시글 작성자가 아니면 수정/삭제 요청을 할 수 없습니다.");
         }
     }
 

@@ -23,7 +23,7 @@ public class PostResponse {
     private final String title;
     private final String contents;
     private final String author;
-    private final Integer likes;
+    private final Long likes;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
@@ -33,7 +33,7 @@ public class PostResponse {
             final String title,
             final String contents,
             final String author,
-            final Integer likes,
+            final Long likes,
             final LocalDateTime createdAt,
             final LocalDateTime modifiedAt
     ) {

@@ -21,7 +21,7 @@ public class PostsPageResponse {
     private final String title;
     private final String author;
     private final LocalDateTime createdAt;
-    private final Integer likes;
+    private final Long likes;
 
     @Builder
     public PostsPageResponse(
@@ -29,7 +29,7 @@ public class PostsPageResponse {
             final String title,
             final String author,
             final LocalDateTime createdAt,
-            final Integer likes
+            final Long likes
     ) {
         this.id = id;
         this.title = title;

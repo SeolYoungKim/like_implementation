@@ -1,5 +1,6 @@
 package com.kimsy.community_service.post.domain;
 
+import com.kimsy.community_service.like.domain.LikeStatus;
 import com.kimsy.community_service.like.domain.Likes;
 import com.kimsy.community_service.member.domain.Member;
 import java.time.LocalDateTime;
@@ -109,8 +110,10 @@ public class Post {
         this.likes.add(likes);
     }
 
-    public Integer getLikesCount() {
-        return likes.size();
+    public Long getLikesCount() {
+        return likes.stream()
+                .filter(likesEntity -> likesEntity.getLikeStatus() == LikeStatus.LIKE)
+                .count();
     }
 
     public Long getId() {

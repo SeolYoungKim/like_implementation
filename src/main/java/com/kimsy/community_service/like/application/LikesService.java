@@ -8,6 +8,7 @@ import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
 import com.kimsy.community_service.post.domain.Post;
 import com.kimsy.community_service.post.domain.PostRepository;
+import java.util.Optional;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,9 +62,24 @@ public class LikesService {
                 .orElseThrow(() -> new IllegalArgumentException("없는 게시글입니다."));
     }
 
-    private void validateDuplicationOfLikes(final Member member, final Post post) {
-        if (likesRepository.existsByMemberAndPost(member, post)) {
-            throw new IllegalArgumentException("게시글 당 좋아요는 한 번만 누를 수 있습니다.");
+    public void dislikePost(final Long postId, final Authentication authentication) {
+        validateAuthenticationIsNull(authentication);
+
+        final Likes likes = getLikesBy(postId, authentication);
+        likes.updateStatusToDislike();
+    }
+
+    private Likes getLikesBy(final Long postId, final Authentication authentication) {
+        final Member member = getMemberBy(authentication);
+        final Post post = getPostBy(postId);
+
+        final Likes likes = likesRepository.findByMemberAndPost(member, post)
+                .orElseThrow(() -> new IllegalArgumentException("누르지 않은 좋아요는 취소할 수 없습니다."));
+
+        if (likes.isDislike()) {
+            throw new IllegalArgumentException("이미 좋아요를 취소한 게시글입니다.");
         }
+
+        return likes;
     }
 }

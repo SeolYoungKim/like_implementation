@@ -109,9 +109,22 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PostsPageResponse> getPosts(final Pageable pageable) {
-        return postQueryRepository.getPosts(pageable)
-                .map(PostsPageResponse::from);
+    public Page<PostsPageResponse> getPosts(final Pageable pageable,
+            final Authentication authentication) {
+        final Page<Post> posts = postQueryRepository.getPosts(pageable);
+        if (authentication == null) {
+            return posts.map(PostsPageResponse::from);
+        }
+
+        final Member member = getMemberBy(authentication);
+        return posts.map(post -> {
+            final Optional<Likes> likes = likesRepository.findByMemberAndPost(member, post);
+            if (likes.isPresent()) {
+                return PostsPageResponse.from(post, likes.get().getLikeStatus());
+            }
+
+            return PostsPageResponse.from(post);
+        });
     }
 
     @Transactional(readOnly = true)
@@ -143,7 +156,7 @@ public class PostService {
         final List<Post> posts = Arrays.asList(
                 new Post("중개사 너무 힘들다", "돈좀 많이벌고싶다.", members.get(0), Delete.NO),
                 new Post("갓물주도 힘들다 ㅠ", "세금좀 내려주라..", members.get(1), Delete.NO),
-                new Post("배부른 소리들 하네", "전세 사기나 치지마.. 월세도 개비쌈;", members.get(2), Delete.NO));
+                new Post("배부른 소리들 하네", "전세 사기나 치지마.. 월세도 너무비쌈;", members.get(2), Delete.NO));
 
         postRepository.saveAll(posts);
     }

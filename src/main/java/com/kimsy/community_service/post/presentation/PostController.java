@@ -48,8 +48,9 @@ public class PostController {
 
     @GetMapping("/posts")
     public Page<PostsPageResponse> getPosts(
-            @PageableDefault(sort = "id", direction = Direction.DESC) Pageable pageable) {
-        return postService.getPosts(pageable);
+            @PageableDefault(sort = "id", direction = Direction.DESC) Pageable pageable,
+            Authentication authentication) {
+        return postService.getPosts(pageable, authentication);
     }
 
     @GetMapping("/posts/{postId}")

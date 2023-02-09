@@ -1,6 +1,8 @@
 package com.kimsy.community_service.post.application;
 
 import com.kimsy.community_service.auth.CustomAuthentication;
+import com.kimsy.community_service.like.domain.Likes;
+import com.kimsy.community_service.like.domain.LikesRepository;
 import com.kimsy.community_service.member.domain.AccountType;
 import com.kimsy.community_service.member.domain.Member;
 import com.kimsy.community_service.member.domain.MemberRepository;
@@ -16,6 +18,7 @@ import com.kimsy.community_service.post.presentation.dto.PostCreateRequest;
 import com.kimsy.community_service.post.presentation.dto.PostUpdateRequest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,15 +32,17 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostQueryRepository postQueryRepository;
     private final MemberRepository memberRepository;
+    private final LikesRepository likesRepository;
 
     public PostService(
             final PostRepository postRepository,
             final PostQueryRepository postQueryRepository,
-            final MemberRepository memberRepository
-    ) {
+            final MemberRepository memberRepository,
+            final LikesRepository likesRepository) {
         this.postRepository = postRepository;
         this.postQueryRepository = postQueryRepository;
         this.memberRepository = memberRepository;
+        this.likesRepository = likesRepository;
     }
 
     public PostResponse createPost(final PostCreateRequest postCreateRequest,
@@ -110,8 +115,18 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostResponse getPost(final Long postId) {
+    public PostResponse getPost(final Long postId, final Authentication authentication) {
         final Post post = getPostBy(postId);
+        if (authentication == null) {
+            return PostResponse.from(post);
+        }
+
+        final Member member = getMemberBy(authentication);
+        final Optional<Likes> likes = likesRepository.findByMemberAndPost(member, post);
+        if (likes.isPresent()) {
+            return PostResponse.from(post, likes.get().getLikeStatus());
+        }
+
         return PostResponse.from(post);
     }
 

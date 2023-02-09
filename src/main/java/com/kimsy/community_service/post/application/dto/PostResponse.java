@@ -1,5 +1,6 @@
 package com.kimsy.community_service.post.application.dto;
 
+import com.kimsy.community_service.like.domain.LikeStatus;
 import com.kimsy.community_service.post.domain.Post;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -8,12 +9,17 @@ import lombok.Getter;
 @Getter
 public class PostResponse {
     public static PostResponse from(final Post post) {
+        return PostResponse.from(post, null);
+    }
+
+    public static PostResponse from(final Post post, final LikeStatus likeStatus) {
         return PostResponse.builder()
                 .id(post.getId())
                 .title(post.getTitle())
                 .contents(post.getContents())
                 .author(String.format("%s(%s)", post.getAuthorName(), post.getKorAccountType()))
                 .likes(post.getLikesCount())
+                .likeStatus(likeStatus)
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
                 .build();
@@ -24,7 +30,9 @@ public class PostResponse {
     private final String contents;
     private final String author;
     private final Long likes;
+    private final LikeStatus likeStatus;
     private final LocalDateTime createdAt;
+
     private final LocalDateTime modifiedAt;
 
     @Builder
@@ -34,7 +42,7 @@ public class PostResponse {
             final String contents,
             final String author,
             final Long likes,
-            final LocalDateTime createdAt,
+            final LikeStatus likeStatus, final LocalDateTime createdAt,
             final LocalDateTime modifiedAt
     ) {
         this.id = id;
@@ -42,6 +50,7 @@ public class PostResponse {
         this.contents = contents;
         this.author = author;
         this.likes = likes;
+        this.likeStatus = likeStatus;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }

@@ -53,7 +53,7 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public PostResponse getPost(@PathVariable Long postId) {
-        return postService.getPost(postId);
+    public PostResponse getPost(@PathVariable Long postId, Authentication authentication) {
+        return postService.getPost(postId, authentication);
     }
 }

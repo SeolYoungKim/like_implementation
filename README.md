@@ -184,8 +184,12 @@ curl --location --request DELETE 'http://localhost:8080/api/posts/1/likes' \
 
 ## 검증 및 구현 방식 
 ### 검증 
-- Junit5, Mockito 프레임워크를 이용한 단위 테스트를 작성하여 검증 
-- `QueryDSL`을 이용한 Repository 한정 `@SpringBootTest`를 이용해 통합 테스트를 작성하여 검증 
+- 토큰 값
+  - 넘어온 값을 파싱하고, `AuthenticationToken`이라는 객체를 만들어 내부에서 검증 수행 
+  - 토큰 값의 일부인 `Realtor`등 계정 타입 관련 정보는 `AccountType`이라는 enum 내부에서 검증 수행 
+- 테스트 코드
+  - Junit5, Mockito 프레임워크를 이용한 단위 테스트를 작성하여 검증 
+  - `QueryDSL`을 이용한 Repository 한정 `@SpringBootTest`를 이용해 통합 테스트를 작성하여 검증 
 
 ### 구현 방식 
 1. 최우선적으로 기능이 돌아가도록 구현

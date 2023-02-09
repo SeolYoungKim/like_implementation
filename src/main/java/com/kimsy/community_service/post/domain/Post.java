@@ -98,4 +98,18 @@ public class Post {
         delete = Delete.YES;
         deletedAt = LocalDateTime.now();
     }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", contents='" + contents + '\'' +
+                ", author=" + author +
+                ", delete=" + delete +
+                ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
+                ", deletedAt=" + deletedAt +
+                '}';
+    }
 }
